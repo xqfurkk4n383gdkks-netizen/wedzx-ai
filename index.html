@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>wedzx - Kişisel Yapay Zeka Asistanı</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #05050a;
+            color: #ffffff;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Arka Plan Efekti */
+        #bgCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Ana Konteyner - Glassmorphism */
+        .container {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            width: 100%;
+            height: 100%;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            background: rgba(10, 10, 20, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Kenar Çubuğu (Sidebar) */
+        sidebar {
+            width: 280px;
+            background: rgba(15, 15, 30, 0.5);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            gap: 15px;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo-area h1 {
+            font-size: 22px;
+            background: linear-gradient(45deg, #ff2a5f, #9d4edd, #00f5d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .capability-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .capability-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .capability-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        .capability-list li {
+            font-size: 13px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            color: #b0b0c0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .capability-list li:hover {
+            background: rgba(255, 42, 95, 0.1);
+            border-color: rgba(255, 42, 95, 0.3);
+            color: #fff;
+            transform: translateX(4px);
+        }
+
+        /* Sohbet Alanı */
+        .chat-main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+        }
+
+        .chat-header {
+            padding: 20px 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #00f5d4;
+            background: rgba(0, 245, 212, 0.1);
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 245, 212, 0.2);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #00f5d4;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #00f5d4;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .message {
+            max-width: 75%;
+            padding: 14px 18px;
+            border-radius: 14px;
+            font-size: 14px;
+            line-height: 1.5;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.ai {
+            background: rgba(25, 25, 45, 0.7);
+            border: 1px solid rgba(157, 78, 221, 0.3);
+            align-self: flex-start;
+            border-top-left-radius: 2px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, rgba(255, 42, 95, 0.8), rgba(157, 78, 221, 0.8));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            align-self: flex-end;
+            border-top-right-radius: 2px;
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(255, 42, 95, 0.2);
+        }
+
+        /* Girdi (Input) Alanı */
+        .chat-input-area {
+            padding: 20px 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(10, 10, 20, 0.4);
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            background: rgba(20, 20, 35, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 8px 12px;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: #ff2a5f;
+            box-shadow: 0 0 15px rgba(255, 42, 95, 0.2);
+        }
+
+        .input-wrapper input {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #fff;
+            font-size: 14px;
+            padding: 6px;
+        }
+
+        .input-wrapper input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #ff2a5f, #9d4edd);
+            border: none;
+            outline: none;
+            color: #white;
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(255, 42, 95, 0.3);
+        }
+
+        .send-btn:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(255, 42, 95, 0.5);
+        }
+
+        /* Mobil Uyum */
+        @media (max-width: 768px) {
+            sidebar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Arka Plan Animasyonu için Canvas -->
+    <canvas id="bgCanvas"></canvas>
+
+    <div class="container">
+        <!-- Kenar Çubuğu: Yetenekler -->
+        <sidebar>
+            <div class="logo-area">
+                <h1>wedzx AI</h1>
+            </div>
+            <ul class="capability-list">
+                <li>💬 Genel Sorular</li>
+                <li>🧠 Matematik & Fen</li>
+                <li>💻 Kod Yazma & Açıklama</li>
+                <li>📄 Dosya Analizi</li>
+                <li>🌐 Güncel Bilgi Arama</li>
+                <li>🖼️ Görsel Anlama</li>
+                <li>🗣️ Çoklu Dil Desteği</li>
+                <li>🧠 Hafıza & Bağlam</li>
+                <li>🔧 Özel Komutlar</li>
+                <li>🧑‍💻 HTML / CSS / JS</li>
+                <li>🐍 Python Destek</li>
+                <li>☕ Java & C/C++</li>
+                <li>📱 Android Kodları</li>
+                <li>🌐 API & Backend</li>
+                <li>🐞 Hata Ayıklama</li>
+                <li>🔧 Kod Düzenleme</li>
+                <li>📁 Çoklu Dosya</li>
+            </ul>
+        </sidebar>
+
+        <!-- Sohbet Alanı -->
+        <div class="chat-main">
+            <div class="chat-header">
+                <h2>wedzx Terminal</h2>
+                <div class="status-badge">
+                    <div class="status-dot"></div>
+                    Sistem Aktif & Hazır
+                </div>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <div class="message ai">
+                    Selam! Ben <strong>wedzx</strong>. Belirttiğin tüm özelliklerle donatılmış şahsi yapay zeka asistanın olarak çalışmaya hazırım. Kod yazma, hata ayıklama, web geliştirme veya herhangi bir konuda bana yazabilirsin. Bugün ne yapıyoruz?
+                </div>
+            </div>
+
+            <div class="chat-input-area">
+                <div class="input-wrapper">
+                    <input type="text" id="userInput" placeholder="wedzx'e bir şeyler yaz (Kod, soru, proje detayları)..." autofocus>
+                    <button class="send-btn" id="sendBtn">Gönder</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Arka Plan Ağ/Mesh Animasyonu (Neon Kırmızı, Mor, Turkuaz)
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        const particles = [];
+        const particleCount = 45;
+        const colors = ['#ff2a5f', '#9d4edd', '#00f5d4'];
+
+        for (let i = 0; i < particleCount; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                vx: (Math.random() - 0.5) * 0.8,
+                vy: (Math.random() - 0.5) * 0.8,
+                radius: Math.random() * 2 + 1,
+                color: colors[Math.floor(Math.random() * colors.length)]
+            });
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Parçacıkları ve Bağlantı Çizgilerini Çiz
+            for (let i = 0; i < particles.length; i++) {
+                let p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+
+                if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = p.color;
+                ctx.fill();
+
+                for (let j = i + 1; j < particles.length; j++) {
+                    let p2 = particles[j];
+                    let dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+                    if (dist < 130) {
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.strokeStyle = `rgba(157, 78, 221, ${1 - dist / 130})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.stroke();
+                    }
+                }
+            }
+            ctx.shadowBlur = 0;
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // Basit Mesaj Gönderme Etkileşimi
+        const chatMessages = document.getElementById('chatMessages');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+
+        function handleSend() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            // Kullanıcı Mesajı
+            const userMsg = document.createElement('div');
+            userMsg.className = 'message user';
+            userMsg.textContent = text;
+            chatMessages.appendChild(userMsg);
+            userInput.value = '';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Yapay Zeka Cevap Simülasyonu
+            setTimeout(() => {
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'message ai';
+                aiMsg.textContent = `wedzx aktif: "${text}" isteğin işleniyor. Gerekli kod yapılandırmasını ve analiz süreçlerini başlatıyorum.`;
+                chatMessages.appendChild(aiMsg);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 600);
+        }
+
+        sendBtn.addEventListener('click', handleSend);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSend();
+        });
+    </script>
+</body>
+</html>
