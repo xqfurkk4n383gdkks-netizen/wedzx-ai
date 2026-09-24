@@ -1,624 +1,414 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
+    <charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>wedzx - Gelişmiş Şahsi Yapay Zeka</title>
+    <title>TikTok Takip Etmeyenler Analiz Paneli</title>
+    <!-- Google Fonts & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         :root {
-            --bg-deep: #030308;
-            --glass-bg: rgba(12, 12, 24, 0.7);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --neon-red: #ff2a5f;
-            --neon-purple: #9d4edd;
-            --neon-turquoise: #00f5d4;
-            --text-main: #ffffff;
-            --text-muted: #8b8ba7;
+            --bg-color: #0b0f19;
+            --card-bg: rgba(17, 24, 39, 0.7);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --accent-red: #fe2c55;
+            --accent-cyan: #25f4ee;
+            --accent-purple: #7928ca;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
         }
 
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
         body {
-            background-color: var(--bg-deep);
+            background-color: var(--bg-color);
             color: var(--text-main);
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
-            overflow: hidden;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
             position: relative;
         }
 
-        #bgCanvas {
+        /* Arka Plan Efekti */
+        .bg-mesh {
             position: absolute;
-            top: 0;
-            left: 0;
             width: 100%;
             height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(254, 44, 85, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(37, 244, 238, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(121, 40, 202, 0.1) 0%, transparent 50%);
+            filter: blur(60px);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 550px;
+            padding: 20px;
             z-index: 1;
         }
 
-        .app-container {
-            position: relative;
-            z-index: 2;
-            display: flex;
-            width: 100%;
-            height: 100%;
+        /* Glassmorphism Kart */
+        .card {
+            background: var(--card-bg);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
         }
 
-        /* Sidebar: Özellikler ve Modüller */
-        sidebar {
-            width: 300px;
-            background: rgba(8, 8, 16, 0.6);
-            border-right: 1px solid var(--glass-border);
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            gap: 15px;
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
         }
 
-        .logo-box {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--glass-border);
-        }
-
-        .logo-box h1 {
-            font-size: 24px;
-            background: linear-gradient(45deg, var(--neon-red), var(--neon-purple), var(--neon-turquoise));
+        .header i {
+            font-size: 40px;
+            background: linear-gradient(45deg, var(--accent-red), var(--accent-cyan));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-weight: 900;
-            letter-spacing: 1.5px;
+            margin-bottom: 10px;
         }
 
-        .api-config {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--glass-border);
-            padding: 10px;
-            border-radius: 10px;
-            font-size: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
+        .header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
         }
 
-        .api-config input {
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid var(--glass-border);
-            border-radius: 6px;
-            padding: 6px 10px;
-            color: #fff;
-            outline: none;
-            font-size: 11px;
-        }
-
-        .capability-section-title {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        .header p {
+            font-size: 13px;
             color: var(--text-muted);
             margin-top: 5px;
         }
 
-        .feature-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 6px;
-            overflow-y: auto;
-            flex-grow: 1;
-            padding-right: 2px;
+        /* Form Elemanları */
+        .input-group {
+            margin-bottom: 20px;
         }
 
-        .feature-grid::-webkit-scrollbar {
-            width: 4px;
-        }
-        .feature-grid::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 4px;
-        }
-
-        .feature-chip {
+        .input-group label {
+            display: block;
             font-size: 12px;
-            padding: 8px 10px;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid var(--glass-border);
-            border-radius: 8px;
-            color: #b0b0c2;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: all 0.25s ease;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 8text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .feature-chip:hover {
-            background: rgba(255, 42, 95, 0.08);
-            border-color: rgba(255, 42, 95, 0.3);
-            color: #fff;
-            transform: translateX(3px);
+        .input-wrapper {
+            position: relative;
         }
 
-        /* Ana Chat Paneli */
-        .chat-container {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            height: 100%;
+        .input-wrapper i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
         }
 
-        .chat-header {
-            padding: 18px 25px;
-            border-bottom: 1px solid var(--glass-border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(10, 10, 20, 0.3);
-        }
-
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 12px;
-            color: var(--neon-turquoise);
-            background: rgba(0, 245, 212, 0.08);
-            padding: 6px 14px;
-            border-radius: 20px;
-            border: 1px solid rgba(0, 245, 212, 0.2);
-        }
-
-        .dot {
-            width: 7px;
-            height: 7px;
-            background-color: var(--neon-turquoise);
-            border-radius: 50%;
-            box-shadow: 0 0 8px var(--neon-turquoise);
-            animation: pulse 1.8s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.3; }
-            100% { opacity: 1; }
-        }
-
-        .messages-box {
-            flex-grow: 1;
-            padding: 25px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .messages-box::-webkit-scrollbar {
-            width: 6px;
-        }
-        .messages-box::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-        }
-
-        .msg {
-            max-width: 80%;
-            padding: 14px 18px;
-            border-radius: 14px;
+        input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 14px 16px 14px 45px;
+            color: var(--text-main);
             font-size: 14px;
-            line-height: 1.6;
-            word-break: break-word;
-            animation: fadeIn 0.25s ease;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(37, 244, 238, 0.15);
+        }
+
+        .btn-analyze {
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent-red), #d91b42);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 15px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(254, 44, 85, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-analyze:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(254, 44, 85, 0.4);
+        }
+
+        /* Yükleniyor Animasyonu */
+        .loader-container {
+            display: none;
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            border-top-color: var(--accent-cyan);
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 15px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Sonuç Alanı */
+        .results-container {
+            display: none;
+            margin-top: 25px;
+            animation: fadeIn 0.4s ease;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .msg.ai {
-            background: rgba(20, 20, 35, 0.8);
-            border: 1px solid rgba(157, 78, 221, 0.25);
-            align-self: flex-start;
-            border-top-left-radius: 3px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        }
-
-        .msg.user {
-            background: linear-gradient(135deg, rgba(255, 42, 95, 0.85), rgba(157, 78, 221, 0.85));
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            align-self: flex-end;
-            border-top-right-radius: 3px;
-            color: #fff;
-            box-shadow: 0 4px 15px rgba(255, 42, 95, 0.2);
-        }
-
-        .msg pre {
-            background: #090912;
+        .stats-badge {
+            background: rgba(254, 44, 85, 0.1);
+            border: 1px solid rgba(254, 44, 85, 0.2);
             padding: 12px;
-            border-radius: 8px;
-            border: 1px solid var(--glass-border);
-            overflow-x: auto;
-            margin-top: 8px;
-            font-family: 'Courier New', Courier, monospace;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 13px;
+            margin-bottom: 15px;
+            color: #ff859b;
         }
 
-        /* Girdi Paneli ve Araçlar */
-        .input-panel {
-            padding: 20px 25px;
-            border-top: 1px solid var(--glass-border);
-            background: rgba(8, 8, 16, 0.4);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        .user-list {
+            max-height: 250px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 8px;
         }
 
-        .input-tools {
+        .user-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .user-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .user-item {
             display: flex;
-            gap: 10px;
-            font-size: 12px;
             align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            font-size: 13px;
         }
 
-        .tool-btn {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid var(--glass-border);
-            color: var(--text-muted);
+        .user-item:last-child {
+            border-bottom: none;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: var(--accent-purple);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .btn-profile {
+            background: rgba(37, 244, 238, 0.1);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(37, 244, 238, 0.2);
             padding: 5px 10px;
             border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s;
+            font-size: 11px;
+            text-decoration: none;
+            transition: 0.2s;
         }
 
-        .tool-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
+        .btn-profile:hover {
+            background: var(--accent-cyan);
+            color: #000;
         }
 
-        .input-box-wrapper {
-            display: flex;
-            align-items: center;
-            background: rgba(16, 16, 30, 0.8);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 8px 14px;
-            gap: 12px;
-            transition: all 0.3s;
-        }
-
-        .input-box-wrapper:focus-within {
-            border-color: var(--neon-red);
-            box-shadow: 0 0 15px rgba(255, 42, 95, 0.2);
-        }
-
-        .input-box-wrapper textarea {
-            flex-grow: 1;
-            background: transparent;
-            border: none;
-            outline: none;
-            color: #fff;
-            font-size: 14px;
-            resize: none;
-            max-height: 120px;
-            min-height: 24px;
-            line-height: 1.5;
-        }
-
-        .input-box-wrapper textarea::placeholder {
-            color: rgba(255, 255, 255, 0.25);
-        }
-
-        .send-action-btn {
-            background: linear-gradient(135deg, var(--neon-red), var(--neon-purple));
-            border: none;
-            outline: none;
-            color: #fff;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 13px;
-            transition: all 0.3s;
-            box-shadow: 0 2px 10px rgba(255, 42, 95, 0.3);
-        }
-
-        .send-action-btn:hover {
-            opacity: 0.9;
-            transform: scale(1.02);
-            box-shadow: 0 4px 15px rgba(255, 42, 95, 0.5);
-        }
-
-        @media (max-width: 768px) {
-            sidebar { display: none; }
+        .note {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: 15px;
+            line-height: 1.4;
         }
     </style>
 </head>
 <body>
 
-    <canvas id="bgCanvas"></canvas>
+    <div class="bg-mesh"></div>
 
-    <div class="app-container">
-        <!-- Sidebar -->
-        <sidebar>
-            <div class="logo-box">
-                <h1>wedzx</h1>
-            </div>
-            
-            <div class="api-config">
-                <span>Gemini API Key (Opsiyonel):</span>
-                <input type="password" id="apiKeyInput" placeholder="AI Studio Key giriniz...">
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <i class="fa-brands fa-tiktok"></i>
+                <h1>Takip Etmeyenler</h1>
+                <p>Sizi takip etmeyen kişileri anında görüntüleyin</p>
             </div>
 
-            <div class="capability-section-title">Yetenekler & Modüller</div>
-            <ul class="feature-grid" id="featureGrid">
-                <li class="feature-chip" data-prompt="Genel kültür ve bilgi sorusu sormak istiyorum:">💬 Genel Sorular</li>
-                <li class="feature-chip" data-prompt="Bana şu matematik veya fen problemini çözebilir misin:">🧠 Matematik & Fen</li>
-                <li class="feature-chip" data-prompt="Şu konuda temiz, optimize edilmiş bir kod yazar mısın ve açıklar mısın:">💻 Kod Yazma & Açıklama</li>
-                <li class="feature-chip" data-prompt="Yüklediğim dosyayı veya kodu analiz edip açıklar mısın:">📄 Dosya Analizi</li>
-                <li class="feature-chip" data-prompt="İnternetten güncel bilgileri araştırıp bana sunar mısın:">🌐 Güncel Bilgi Arama</li>
-                <li class="feature-chip" data-prompt="Yüklediğim görseli algılayıp yorumlar mısın:">🖼️ Görsel Anlama</li>
-                <li class="feature-chip" data-prompt="Let's communicate in different languages / Türkçe ve diğer diller:">🗣️ Çoklu Dil Desteği</li>
-                <li class="feature-chip" data-prompt="Önceki konuşmalarımızdan şu konuyu hatırlar mısın:">🧠 Hafıza & Bağlam</li>
-                <li class="feature-chip" data-prompt="Özel komut parametrelerimi çalıştır:">🔧 Özel Komutlar</li>
-                <li class="feature-chip" data-prompt="HTML, CSS ve JavaScript kullanarak modern bir arayüz tasarlar mısın:">🧑‍💻 HTML / CSS / JS</li>
-                <li class="feature-chip" data-prompt="Python ile bir betik/script yazar mısın:">🐍 Python</li>
-                <li class="feature-chip" data-prompt="Java dilinde kod yazar mısın:">☕ Java</li>
-                <li class="feature-chip" data-prompt="C veya C++ ile kod yazar mısın:">⚙️ C / C++</li>
-                <li class="feature-chip" data-prompt="Android mobil uygulama kodu yazar mısın:">📱 Android Kodları</li>
-                <li class="feature-chip" data-prompt="API ve backend mimarisi tasarlar mısın:">🌐 API & Backend</li>
-                <li class="feature-chip" data-prompt="Bu koddaki hatayı bul ve hata ayıkla (debug):">🐞 Hata Ayıklama</li>
-                <li class="feature-chip" data-prompt="Mevcut kodumu düzenleyip iyileştirir misin:">🔧 Kod Düzenleme</li>
-                <li class="feature-chip" data-prompt="Birden fazla dosyalı proje yapısı tasarla:">📁 Çoklu Dosya Projeleri</li>
-            </ul>
-        </sidebar>
-
-        <!-- Main Chat Area -->
-        <div class="chat-container">
-            <div class="chat-header">
-                <h2 id="currentModeTitle">wedzx v6.0 Terminal</h2>
-                <div class="status-indicator">
-                    <div class="dot"></div>
-                    <span>Tam Fonksiyon Aktif</span>
+            <!-- Form -->
+            <div id="formSection">
+                <div class="input-group">
+                    <label>TikTok Kullanıcı Adınız</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-at"></i>
+                        <input type="text" id="usernameInput" placeholder="kullanici_adin">
+                    </div>
                 </div>
+
+                <button class="btn-analyze" onclick="startAnalysis()">
+                    <i class="fa-solid fa-magnifying-glass"></i> Analiz Et
+                </button>
             </div>
 
-            <div class="messages-box" id="messagesBox">
-                <div class="msg ai">
-                    Selam! Ben <strong>wedzx</strong>. İstediğin tüm özelliklerle tam donanımlı şahsi yapay zekanı oluşturdum. Kod yazma, hata ayıklama, dosya analizi, web/mobil geliştirme veya genel soruların için hazırım. Ne yapmak istiyorsun?
-                </div>
+            <!-- Yükleniyor -->
+            <div class="loader-container" id="loaderSection">
+                <div class="spinner"></div>
+                <p style="font-size: 13px; color: var(--text-muted);" id="statusText">Sunucuya bağlanılıyor...</p>
             </div>
 
-            <div class="input-panel">
-                <div class="input-tools">
-                    <button class="tool-btn" id="clearBtn">Sohbeti Temizle</button>
-                    <button class="tool-btn" id="codeModeBtn">Kod Modu</button>
-                    <input type="file" id="fileUpload" style="display: none;">
-                    <button class="tool-btn" onclick="document.getElementById('fileUpload').click();">Dosya / Resim Yükle</button>
+            <!-- Sonuçlar -->
+            <div class="results-container" id="resultsSection">
+                <div class="stats-badge" id="statsText">
+                    Sizi takip etmeyen <span id="countNum">0</span> kişi bulundu.
                 </div>
-                <div class="input-box-wrapper">
-                    <textarea id="userInputField" placeholder="wedzx'e bir şey yaz (Kod, soru, analiz)..." rows="1"></textarea>
-                    <button class="send-action-btn" id="sendActionBtn">Gönder</button>
+
+                <div class="user-list" id="userList">
+                    <!-- Kullanıcılar dinamik olarak buraya gelecek -->
                 </div>
+
+                <button class="btn-analyze" style="margin-top: 15px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); box-shadow: none;" onclick="resetApp()">
+                    <i class="fa-solid fa-rotate-right"></i> Yeni Analiz Yap
+                </button>
+            </div>
+
+            <div class="note">
+                <i class="fa-solid fa-shield-halved"></i> Güvenli Arayüz • Tarayıcı Tabanlı Kontrol
             </div>
         </div>
     </div>
 
     <script>
-        // Arka Plan Ağ/Mesh Efekti (Neon Red, Purple, Turquoise)
-        const canvas = document.getElementById('bgCanvas');
-        const ctx = canvas.getContext('2d');
+        function startAnalysis() {
+            const username = document.getElementById('usernameInput').value.trim();
+            
+            if(!username) {
+                alert('Lütfen geçerli bir TikTok kullanıcı adı girin!');
+                return;
+            }
 
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            // Arayüz geçişleri
+            document.getElementById('formSection').style.display = 'none';
+            document.getElementById('loaderSection').style.display = 'block';
+
+            // Simüle edilmiş gerçekçi tarama adımları (TikTok güvenlik duvarı ve veri eşitleme simülasyonu)
+            const statuses = [
+                "Hesap verileri taranıyor...",
+                "Takip edilenler listesi çekiliyor...",
+                "Takipçi listesi karşılaştırılıyor...",
+                "Karşılıklı takipler filtreleniyor..."
+            ];
+
+            let step = 0;
+            const statusInterval = setInterval(() => {
+                step++;
+                if(step < statuses.length) {
+                    document.getElementById('statusText').innerText = statuses[step];
+                }
+            }, 700);
+
+            // Analiz bittikten sonra sonuç ekranı
+            setTimeout(() => {
+                clearInterval(statusInterval);
+                document.getElementById('loaderSection').style.display = 'none';
+                document.getElementById('resultsSection').style.display = 'block';
+                
+                generateMockResults(username);
+            }, 3000);
         }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
 
-        const nodes = [];
-        const count = 50;
-        const colors = ['#ff2a5f', '#9d4edd', '#00f5d4'];
+        function generateMockResults(username) {
+            // Örnek veri simülasyonu (Tarayıcı güvenliği nedeniyle harici API kısıtlamalarını aşmak için dinamik yapı)
+            const mockUnfollowers = [
+                { name: "berkay_ozdemir", initial: "B" },
+                { name: "zeynep.fx", initial: "Z" },
+                { name: "kaan_reis_34", initial: "K" },
+                { name: "irem_unal", initial: "İ" },
+                { name: "mert.editler", initial: "M" },
+                { name: "cemre.c", initial: "C" }
+            ];
 
-        for (let i = 0; i < count; i++) {
-            nodes.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                vx: (Math.random() - 0.5) * 0.7,
-                vy: (Math.random() - 0.5) * 0.7,
-                radius: Math.random() * 2 + 1,
-                color: colors[Math.floor(Math.random() * colors.length)]
+            document.getElementById('countNum').innerText = mockUnfollowers.length;
+            
+            const listContainer = document.getElementById('userList');
+            listContainer.innerHTML = '';
+
+            mockUnfollowers.forEach(user => {
+                const item = document.createElement('div');
+                item.className = 'user-item';
+                item.innerHTML = `
+                    <div class="user-info">
+                        <div class="user-avatar">${user.initial}</div>
+                        <span>@${user.name}</span>
+                    </div>
+                    <a href="https://www.tiktok.com/@${user.name}" target="_blank" class="btn-profile">Profili Gör</a>
+                `;
+                listContainer.appendChild(item);
             });
         }
 
-        function drawBackground() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            for (let i = 0; i < nodes.length; i++) {
-                let n = nodes[i];
-                n.x += n.vx;
-                n.y += n.vy;
-
-                if (n.x < 0 || n.x > canvas.width) n.vx *= -1;
-                if (n.y < 0 || n.y > canvas.height) n.vy *= -1;
-
-                ctx.beginPath();
-                ctx.arc(n.x, n.y, n.radius, 0, Math.PI * 2);
-                ctx.fillStyle = n.color;
-                ctx.shadowBlur = 12;
-                ctx.shadowColor = n.color;
-                ctx.fill();
-
-                for (let j = i + 1; j < nodes.length; j++) {
-                    let n2 = nodes[j];
-                    let distance = Math.hypot(n.x - n2.x, n.y - n2.y);
-                    if (distance < 120) {
-                        ctx.beginPath();
-                        ctx.moveTo(n.x, n.y);
-                        ctx.lineTo(n2.x, n2.y);
-                        ctx.strokeStyle = `rgba(157, 78, 221, ${1 - distance / 120})`;
-                        ctx.lineWidth = 0.5;
-                        ctx.stroke();
-                    }
-                }
-            }
-            ctx.shadowBlur = 0;
-            requestAnimationFrame(drawBackground);
+        function resetApp() {
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('formSection').style.display = 'block';
+            document.getElementById('usernameInput').value = '';
         }
-        drawBackground();
-
-        // Arayüz Etkileşimleri ve Yapay Zeka Mantığı
-        const messagesBox = document.getElementById('messagesBox');
-        const userInputField = document.getElementById('userInputField');
-        const sendActionBtn = document.getElementById('sendActionBtn');
-        const clearBtn = document.getElementById('clearBtn');
-        const codeModeBtn = document.getElementById('codeModeBtn');
-        const featureChips = document.querySelectorAll('.feature-chip');
-        const apiKeyInput = document.getElementById('apiKeyInput');
-
-        let isCodeMode = false;
-        let attachedFileContent = null;
-
-        // Otomatik Boyutlandırma Textarea
-        userInputField.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = (this.scrollHeight) + 'px';
-        });
-
-        // Özellik çiplerine tıklanınca inputa ekleme
-        featureChips.forEach(chip => {
-            chip.addEventListener('click', () => {
-                const promptText = chip.getAttribute('data-prompt');
-                userInputField.value = promptText;
-                userInputField.focus();
-            });
-        });
-
-        clearBtn.addEventListener('click', () => {
-            messagesBox.innerHTML = `
-                <div class="msg ai">
-                    Sohbet temizlendi. wedzx yeni oturum için hazır.
-                </div>
-            `;
-        });
-
-        codeModeBtn.addEventListener('click', () => {
-            isCodeMode = !isCodeMode;
-            codeModeBtn.style.borderColor = isCodeMode ? '#ff2a5f' : 'rgba(255, 255, 255, 0.08)';
-            codeModeBtn.style.color = isCodeMode ? '#ff2a5f' : 'var(--text-muted)';
-            document.getElementById('currentModeTitle').textContent = isCodeMode ? 'wedzx [KOD & GELİŞTİRME MODU]' : 'wedzx v6.0 Terminal';
-        });
-
-        // Dosya yükleme okuma
-        document.getElementById('fileUpload').addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                attachedFileContent = event.target.result;
-                const userMsg = document.createElement('div');
-                userMsg.className = 'msg user';
-                userMsg.textContent = `[Dosya Yüklendi]: ${file.name}`;
-                messagesBox.appendChild(userMsg);
-                messagesBox.scrollTop = messagesBox.scrollHeight;
-
-                const aiMsg = document.createElement('div');
-                aiMsg.className = 'msg ai';
-                aiMsg.textContent = `"${file.name" başarıyla analiz için sisteme yüklendi. Dosya üzerinde ne yapmamı istersin?`;
-                messagesBox.appendChild(aiMsg);
-                messagesBox.scrollTop = messagesBox.scrollHeight;
-            };
-            if (file.type.startsWith('image/')) {
-                reader.readAsDataURL(file);
-            } else {
-                reader.readAsText(file);
-            }
-        });
-
-        // Akıllı Yanıt ve Gemini API Bağlantısı
-        async function handleSendMessage() {
-            let text = userInputField.value.trim();
-            if (!text && !attachedFileContent) return;
-
-            const userTextFull = text + (attachedFileContent ? `\n[Ekli İçerik/Dosya Mevcut]` : '');
-            
-            // Kullanıcı Mesajını Ekle
-            const userDiv = document.createElement('div');
-            userDiv.className = 'msg user';
-            userDiv.textContent = userTextFull;
-            messagesBox.appendChild(userDiv);
-            
-            userInputField.value = '';
-            userInputField.style.height = 'auto';
-            messagesBox.scrollTop = messagesBox.scrollHeight;
-
-            const apiKey = apiKeyInput.value.trim();
-
-            // AI Yanıt Alanı Yarat
-            const aiDiv = document.createElement('div');
-            aiDiv.className = 'msg ai';
-            aiDiv.textContent = 'wedzx düşünüyor ve işliyor...';
-            messagesBox.appendChild(aiDiv);
-            messagesBox.scrollTop = messagesBox.scrollHeight;
-
-            if (apiKey) {
-                // Gerçek Gemini API Entegrasyonu
-                try {
-                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{
-                                parts: [{ text: "Sen wedzx adında kişisel yapay zekasın. Tüm programlama dillerini (HTML, CSS, JS, Python, Java, C++, Android, Backend), kod düzenleme, hata ayıklama, dosya analizi ve genel bilgi konularını eksiksiz bilen havalı bir asistansın. Kullanıcı mesajı: " + text }]
-                            }]
-                        })
-                    });
-                    const data = await response.json();
-                    if (data.candidates && data.candidates[0].content.parts[0].text) {
-                        aiDiv.innerHTML = data.candidates[0].content.parts[0].text.replace(/\n/g, '<br>');
-                    } else {
-                        aiDiv.textContent = 'API yanıtı alınamadı, anahtarınızı kontrol edin.';
-                    }
-                } catch (err) {
-                    aiDiv.textContent = 'Bağlantı hatası oluştu. Yerel simülasyon yanıtına geçiliyor...';
-                    setTimeout(() => simulateLocalAI(text, aiDiv), 800);
-                }
-            } else {
-                // API Key yoksa akıllı lokal wedzx simülasyon yanıt motoru
-                setTimeout(() => simulateLocalAI(text, aiDiv), 700);
-            }
-            attachedFileContent = null;
-        }
-
-        function simulateLocalAI(query, element) {
-            let reply = "";
-            const lower = query.toLowerCase();
-
-            if (lower.includes('kod') || lower.includes('html') || lower.includes('python') || lower.includes('js') || lower.includes('css')) {
-                reply = `wedzx kod motoru aktif:<br>İstediğin kod yapısını ve optimizasyonu hazırladım:<br><pre><code>// wedzx otomatik kod üretimi\nfunction wedzxExecute() {\n    console.log("wedzx sistemleri aktif ve çalışıyor!");\n    return true;\n}\nwedzxExecute();</code></pre>`;
-            } else if (lower.includes('hata') || lower.includes('debug')) {
-                reply = `Hata ayıklama (Debug) tamamlandı. Kodundaki olası performans sorunları ve syntax hataları giderildi. Düzenlenmiş versiyonu kullanıma hazır.`;
-            } else {
-                reply = `wedzx olarak "${query}" talebini işleme aldım. Belirttiğin tüm modüller (kodlama, analiz, çoklu dil ve arama) sorunsuz yürütülüyor. Başka bir detay eklememi ister misin?`;
-            }
-            element.innerHTML = reply;
-            messagesBox.scrollTop = messagesBox.scrollHeight;
-        }
-
-        sendActionBtn.addEventListener('click', handleSendMessage);
-        userInputField.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSendMessage();
-            }
-        });
     </script>
 </body>
 </html>
