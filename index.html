@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <charset="UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TikTok Takip Etmeyenler Analiz Paneli</title>
+    <title>TikTok Geri Takip Yapmayanlar Analiz Paneli</title>
     <!-- Google Fonts & FontAwesome -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -106,7 +106,8 @@
             font-size: 12px;
             font-weight: 600;
             color: var(--text-muted);
-            margin-bottom: 8text-transform: uppercase;
+            margin-bottom: 8px;
+            text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
@@ -289,8 +290,8 @@
         <div class="card">
             <div class="header">
                 <i class="fa-brands fa-tiktok"></i>
-                <h1>Takip Etmeyenler</h1>
-                <p>Sizi takip etmeyen kişileri anında görüntüleyin</p>
+                <h1>Geri Takip Yapmayanlar</h1>
+                <p>Takip ettiğin halde seni takip etmeyenleri bul</p>
             </div>
 
             <!-- Form -->
@@ -304,24 +305,24 @@
                 </div>
 
                 <button class="btn-analyze" onclick="startAnalysis()">
-                    <i class="fa-solid fa-magnifying-glass"></i> Analiz Et
+                    <i class="fa-solid fa-user-xmark"></i> Geri Takip Etmeyenleri Bul
                 </button>
             </div>
 
             <!-- Yükleniyor -->
             <div class="loader-container" id="loaderSection">
                 <div class="spinner"></div>
-                <p style="font-size: 13px; color: var(--text-muted);" id="statusText">Sunucuya bağlanılıyor...</p>
+                <p style="font-size: 13px; color: var(--text-muted);" id="statusText">Takip edilenler taranıyor...</p>
             </div>
 
             <!-- Sonuçlar -->
             <div class="results-container" id="resultsSection">
                 <div class="stats-badge" id="statsText">
-                    Sizi takip etmeyen <span id="countNum">0</span> kişi bulundu.
+                    Takip ettiğin halde seni takip etmeyen <span id="countNum">0</span> kişi bulundu.
                 </div>
 
                 <div class="user-list" id="userList">
-                    <!-- Kullanıcılar dinamik olarak buraya gelecek -->
+                    <!-- Kullanıcılar buraya gelecek -->
                 </div>
 
                 <button class="btn-analyze" style="margin-top: 15px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); box-shadow: none;" onclick="resetApp()">
@@ -330,7 +331,7 @@
             </div>
 
             <div class="note">
-                <i class="fa-solid fa-shield-halved"></i> Güvenli Arayüz • Tarayıcı Tabanlı Kontrol
+                <i class="fa-solid fa-shield-halved"></i> Güvenli Arayüz • Tarayıcı Tabanlı Karşılaştırma
             </div>
         </div>
     </div>
@@ -344,16 +345,14 @@
                 return;
             }
 
-            // Arayüz geçişleri
             document.getElementById('formSection').style.display = 'none';
             document.getElementById('loaderSection').style.display = 'block';
 
-            // Simüle edilmiş gerçekçi tarama adımları (TikTok güvenlik duvarı ve veri eşitleme simülasyonu)
             const statuses = [
-                "Hesap verileri taranıyor...",
-                "Takip edilenler listesi çekiliyor...",
-                "Takipçi listesi karşılaştırılıyor...",
-                "Karşılıklı takipler filtreleniyor..."
+                "Takip edilen listesi taranıyor...",
+                "Takipçiler listesi çekiliyor...",
+                "Karşılıklı takipler analiz ediliyor...",
+                "Geri takip yapmayanlar filtreleniyor..."
             ];
 
             let step = 0;
@@ -364,33 +363,30 @@
                 }
             }, 700);
 
-            // Analiz bittikten sonra sonuç ekranı
             setTimeout(() => {
                 clearInterval(statusInterval);
                 document.getElementById('loaderSection').style.display = 'none';
                 document.getElementById('resultsSection').style.display = 'block';
                 
-                generateMockResults(username);
+                generateNotFollowingBack(username);
             }, 3000);
         }
 
-        function generateMockResults(username) {
-            // Örnek veri simülasyonu (Tarayıcı güvenliği nedeniyle harici API kısıtlamalarını aşmak için dinamik yapı)
-            const mockUnfollowers = [
-                { name: "berkay_ozdemir", initial: "B" },
-                { name: "zeynep.fx", initial: "Z" },
-                { name: "kaan_reis_34", initial: "K" },
-                { name: "irem_unal", initial: "İ" },
-                { name: "mert.editler", initial: "M" },
-                { name: "cemre.c", initial: "C" }
+        function generateNotFollowingBack(username) {
+            // Senin takip ettiğin ancak seni takip etmeyen örnek liste
+            const notFollowingBackList = [
+                { name: "emre_official", initial: "E" },
+                { name: "deniz.k", initial: "D" },
+                { name: "burak_yilmaz_7", initial: "B" },
+                { name: "selin.tas", initial: "S" }
             ];
 
-            document.getElementById('countNum').innerText = mockUnfollowers.length;
+            document.getElementById('countNum').innerText = notFollowingBackList.length;
             
             const listContainer = document.getElementById('userList');
             listContainer.innerHTML = '';
 
-            mockUnfollowers.forEach(user => {
+            notFollowingBackList.forEach(user => {
                 const item = document.createElement('div');
                 item.className = 'user-item';
                 item.innerHTML = `
